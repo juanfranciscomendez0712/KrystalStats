@@ -1,0 +1,24 @@
+combat-tag:
+  duration: 12 # Segundos
+  low-health-threshold: 6.0 # Vida (en HP, 6.0 = 3 corazones) para morir al desconectarse en combate
+
+messages:
+  tagged: "<red>¡Estás en combate! No te desconectes."
+  untagged: "<green>Ya no estás en combate."
+  command-blocked: "<red>¡No puedes usar comandos mientras estás en combate!"
+bossbar:
+  text: "<red>¡Estás en PvP! <yellow>[time]s <red>restantes"
+# Puntos obtenidos (positivo) o perdidos (negativo)
+scoring:
+  # Cuando matas a alguien
+  kill:
+    target-strong: 20 # El enemigo tiene > 2x tus puntos
+    target-normal: 10 # Normal
+    target-weak: 2    # El enemigo tiene < 0.5x tus puntos
+
+  # Cuando mueres
+  death:
+    killer-strong: -5 # Te mató alguien con > 2x tus puntos
+    killer-normal: -10 # Normal
+    killer-weak: -20  # Te mató alguien con < 0.5x tus puntos
+    by-entity: -5     # Morir por mob/caida/etc
