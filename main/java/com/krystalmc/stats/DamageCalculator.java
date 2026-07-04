@@ -2,9 +2,9 @@ package com.krystalmc.stats;
 
 public class DamageCalculator {
 
-    // Renombré 'protection' a 'reductionPoints' para representar el valor sumado de todo sin el límite
+    // Se renombró 'protection' a 'reductionPoints' para representar el valor sumado de todo sin el límite, evitando confusiones
     public static double calculateFinalDamage(double originalDamage, double reductionPoints, double defense, double toughness, boolean isFallDamage, int featherFallingLevel) {
-        // Fase 1: Defensa Plana
+        // Fase 1: Defensa Plana (1def = -1dmg)
         double damageAfterDefense;
         if (defense <= 0.0) {
             damageAfterDefense = Math.max(1.0, originalDamage);
@@ -23,17 +23,17 @@ public class DamageCalculator {
         if (reductionPoints > 0.0) {
             
             // 1. Calculamos el Límite Porcentual (Limitado estrictamente al 90%)
-            // Lo dividimos en 100 para que trabaje en formato decimal (0.90)
+            // Se divide en 100 para que trabaje en formato decimal (ejemplo: 0.90)
             double maxReductionPercent = Math.min(90.0, reductionPoints) / 100.0;
             
             // 2. Calculamos la eficiencia contra el impacto
             // Eficiencia = (Puntos de reducción + Dureza / 2) / (Puntos de reducción + Daño Entrante)
             double efficiency = (reductionPoints + (toughness / 2.0)) / (reductionPoints + damageAfterDefense);
             
-            // 3. Multiplicamos la reducción porcentual por la eficiencia
+            // 3. Multiplicamos la reducción porcentual por la eficiencia para obtener la reducción que realmente se usará
             realReduction = maxReductionPercent * efficiency;
             
-            // Medida de seguridad: Si la eficiencia supera el 100% (golpes muy débiles vs armaduras muy duras), 
+            // Si la eficiencia supera el 100% (golpes muy débiles vs armaduras muy duras), 
             // limitamos la reducción resultante para que NUNCA pase del 90% original.
             realReduction = Math.max(0.0, Math.min(0.90, realReduction));
             
@@ -48,10 +48,13 @@ public class DamageCalculator {
             }
         }
         
-        // Fase 4: Ajuste por Daño de Caída (Intacto)
+        // Fase 4: Ajuste por Daño de Caída 
         if (isFallDamage) {
+            // La armadura protege máximo un 15% del daño entrante (si es daño de caída)-
             double armorReduction = Math.min(0.15, realReduction);
+            // Además, el daño se reduce en un 15% extra por cada nivel del encantamiento "caída de pluma".
             double featherFallingReduction = featherFallingLevel * 0.15;
+            // Máxima reducción de 90%
             realReduction = Math.min(0.90, armorReduction + featherFallingReduction);
             if (KrystalStats.debugMode) {
                 KrystalStats.getInstance().getLogger().info("[Calc] Es Daño Por Caída. Reducción ajustada = " + realReduction);
@@ -65,7 +68,7 @@ public class DamageCalculator {
             KrystalStats.getInstance().getLogger().info("[Calc] Fase 4 - Reducción Real de Daño (%) = " + (realReduction * 100) + "%");
             KrystalStats.getInstance().getLogger().info("[Calc] Daño temporal antes de limite mínimo: " + finalDamage);
         }
-
+        // Si el daño resultante de todo el codigo, por alguna razón, es menor a 0.2, entonces, se inflinge un daño de 0.2 como minímo.
         if (finalDamage < 0.20) {
             finalDamage = 0.20;
         }
