@@ -36,6 +36,10 @@ public class StatsManager {
                 PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
                 double defVal = 0.0;
                 boolean hasDefense = false;
+                // El uso del lector hibrído es por compatibilidad, sucede que anteriormente usaba float
+                // cosa que causaba problemas con algunos plugins que manejan items en el servidor, que
+                // trabajaban con double, por lo que hice que este plugin registrara la defensa en double,
+                // y pudiera analizarlo tanto en double como en float.
 
                 // Lector híbrido seguro para evitar bugs con ExecutableItems
                 if (pdc.has(DEFENSE_VALUE_KEY, PersistentDataType.DOUBLE)) {
