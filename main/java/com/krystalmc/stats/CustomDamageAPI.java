@@ -13,28 +13,27 @@ import org.bukkit.Bukkit;
 public class CustomDamageAPI {
 
     /**
-     * Aplica daño custom a una entidad utilizando la API de KrystalStats.
-     * 
-     * @param victim La entidad que recibe el daño
-     * @param damage Daño bruto inicial
-     * @param cause El tipo de daño vanilla
-     * @param directEntity Entidad física (ej. flecha) (opcional)
-     * @param sourceEntity Atacante real (ej. jugador) (opcional)
-     * @param location Localización del daño (opcional)
-     * @param ignoreProtection Pct. de Protection a ignorar (0.0 a 1.0)
-     * @param ignoreDefense Pct. de Defense a ignorar (0.0 a 1.0)
-     * @param ignoreToughness Pct. de Toughness a ignorar (0.0 a 1.0)
+     * Aplica daño personalizado a una entidad utilizando el sistema de estadísticas de KrystalStats.
+     * @param victim           La entidad que recibe el daño.
+     * @param damage           Daño bruto inicial.
+     * @param cause            El tipo de daño vanilla (causa del evento).
+     * @param directEntity     Entidad física que causa el daño (ej. una flecha). Opcional.
+     * @param sourceEntity     Atacante real responsable del daño (ej. un jugador). Opcional.
+     * @param location         Localización donde ocurre el daño. Opcional.
+     * @param ignoreProtection Porcentaje de protección a ignorar (0.0 a 1.0).
+     * @param ignoreDefense    Porcentaje de defensa a ignorar (0.0 a 1.0).
+     * @param ignoreToughness  Porcentaje de dureza (toughness) a ignorar (0.0 a 1.0).
      */
     public static void applyCustomDamage(LivingEntity victim, double damage, EntityDamageEvent.DamageCause cause, 
                                          Entity directEntity, Entity sourceEntity, Location location,
                                          double ignoreProtection, double ignoreDefense, double ignoreToughness) {
         
-        // 1. Obtener estadisticas base
+        // 1. Obtener estadísticas base de la víctima
         double defense = StatsManager.getFlatDefense(victim);
         double protection = StatsManager.getCustomProtection(victim, cause);
         double toughness = StatsManager.getArmorToughness(victim);
 
-        // 2. Aplicar penetraciones
+        // 2. Aplicar los multiplicadores de penetración (se utiliza reducción porcentual)
         defense = Math.max(0, defense * (1.0 - ignoreDefense));
         protection = Math.max(0, protection * (1.0 - ignoreProtection));
         toughness = Math.max(0, toughness * (1.0 - ignoreToughness));
@@ -42,20 +41,21 @@ public class CustomDamageAPI {
         boolean isFallDamage = cause == EntityDamageEvent.DamageCause.FALL;
         int featherFallingLevel = isFallDamage ? StatsManager.getFeatherFallingLevel(victim) : 0;
 
-        // 3. Calculo
+        // 3. Calcular el daño final mitigado
         double finalDamage = DamageCalculator.calculateFinalDamage(damage, protection, defense, toughness, isFallDamage, featherFallingLevel);
 
-        // 4. Aplicar daño
-        // AHORA (Mejor práctica, tipado seguro)
+        // 4. Construir el DamageSource utilizando el registro de Paper
         DamageType krystalType = RegistryAccess.registryAccess()
                 .getRegistry(RegistryKey.DAMAGE_TYPE)
                 .get(MiBootstrap.KRYSTAL_DAMAGE_KEY);
+        
         DamageSource.Builder sourceBuilder = DamageSource.builder(krystalType != null ? krystalType : DamageType.GENERIC);
+        
         if (directEntity != null) sourceBuilder.withDirectEntity(directEntity);
         if (sourceEntity != null) sourceBuilder.withCausingEntity(sourceEntity);
         if (location != null) sourceBuilder.withDamageLocation(location);
 
-        // Se usa el DamageSource para invocar damage
+        // 5. Aplicar el daño final a la entidad usando la API de Paper
         victim.damage(finalDamage, sourceBuilder.build());
     }
 }
