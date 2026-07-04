@@ -13,13 +13,13 @@ public class DamageListener implements Listener {
     public void onEntityDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof LivingEntity)) return;
 
-        // Extraer las llaves del DamageSource (útil en 1.20+ para Skript y Custom Damages)
+        // Extraer las llaves del DamageSource
         String damageNamespace = event.getDamageSource().getDamageType().getKey().getNamespace();
         String damageKey = event.getDamageSource().getDamageType().getKey().getKey();
 
         // 1. Ignorar daño del vacío
-        // Al usar Skript con "caused by {_p}", Bukkit lo cambia a ENTITY_ATTACK. 
-        // Leer 'out_of_bounds' (nombre técnico actual del vacío) asegura que se bloquee correctamente.
+        // Realmente esto es código absoleto, debido a que antes yo usaba daño vacío para poder ignorar armadura, antes de crear este complemento.
+        // Sin embargo, una vez creé este complemento y lo fuí actualizando, ya no es realmente necesario, pese a ello no lo he eliminado.
         if (event.getCause() == EntityDamageEvent.DamageCause.VOID || 
             damageKey.equals("out_of_bounds") || 
             damageKey.equals("void")) {
@@ -37,11 +37,14 @@ public class DamageListener implements Listener {
         double originalDamage = event.getDamage();
 
         // [NUEVO] Reducir daño masivo de explosiones (Ender Crystals, TNT, etc) antes de entrar al sistema
+
+        // Esta fue una adición muy reciente, debido a que me dí cuenta que las explosiones solían llegar a cantidades de daño entrante exageradamente grandes
+        // lo cual rompía el balance de los calculos dentro del juego.
         if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION || 
             event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION ||
             damageKey.contains("explosion")) {
             
-            originalDamage /= 2.0; // Se divide en 2.0
+            originalDamage /= 2.0; // Se divide en 2.0 para obtener un número mas manejable
             
             if (KrystalStats.debugMode) {
                 KrystalStats.getInstance().getLogger().info("--- [DEBUG DAÑO] EXPLOSIÓN DETECTADA ---");
@@ -49,7 +52,7 @@ public class DamageListener implements Listener {
             }
         }
 
-        // Si el dano original fue ya reducido a 0 por algun motivo (ej magic), salir.
+        // Si el dano original fue ya reducido a 0 por algun motivo, salir.
         if (originalDamage <= 0) return;
         
         if (KrystalStats.debugMode) {
@@ -81,13 +84,13 @@ public class DamageListener implements Listener {
         // Establecer Daño Base al Daño Entrante Real.
         event.setDamage(finalDamage);
 
-        // Establecer modificadores vanilla de Armadura y Magia a 0
+        // Establecer modificadores vanilla de Armadura y Magia a 0 pues el complemento hace sus propios calculos de reducción.
         if (event.isApplicable(EntityDamageEvent.DamageModifier.ARMOR)) {
             event.setDamage(EntityDamageEvent.DamageModifier.ARMOR, 0);
         }
         if (event.isApplicable(EntityDamageEvent.DamageModifier.MAGIC)) {
             event.setDamage(EntityDamageEvent.DamageModifier.MAGIC, 0);
         }
-        // Nota: Resistencia (poción) y absorción NO se tocan por reducciones.md
+        // Nota: Resistencia (poción) no se toca, pues la verdad me gusta su funcionalidad vanilla.
     }
 }
