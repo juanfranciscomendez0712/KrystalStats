@@ -1,5 +1,3 @@
-
-// ESTO ES SOLO UNA BASE, HAZ LOS CAMBIOS NECESARIOS PARA IMPLEMENTAR CORRECTAMENTE LA LOGICA DE REDUCCIONES.md
 package com.krystalmc.stats;
 
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
@@ -18,7 +16,7 @@ import java.util.List;
 
 public class MiBootstrap implements PluginBootstrap {
 
-    // Creamos la llave (ID) de nuestro tipo de daño
+    // Tipo de daño personalizado
     public static final TypedKey<DamageType> KRYSTAL_DAMAGE_KEY = TypedKey.create(
             RegistryKey.DAMAGE_TYPE, Key.key("krystal", "damage")
     );
@@ -32,7 +30,7 @@ public class MiBootstrap implements PluginBootstrap {
             event.registry().register(KRYSTAL_DAMAGE_KEY, builder -> {
                 builder.damageScaling(DamageScaling.NEVER) // El daño no escala con la dificultad
                        .exhaustion(0.1f)             // Cuánta hambre quita recibirlo
-                       .messageId("krystal_damage");    // Mensaje de muerte (death.attack.dano_custom)
+                       .messageId("krystal_damage");    // Mensaje de muerte
             });
         }));
 
