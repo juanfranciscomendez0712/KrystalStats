@@ -21,10 +21,10 @@ public class KrystalStats extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DamageListener(), this);
         
         getServer().getCommandMap().register(getName(), new StatsCommand());
+        // Registrar el addon en el plugin de terceros, Skript, para poder usar funciones personalizadas.
                 if (Bukkit.getPluginManager().getPlugin("Skript") != null) {
             skriptAddon = Skript.registerAddon(this);
             try {
-                // Esto cargará automáticamente la clase Effect que vamos a crear
                 skriptAddon.loadClasses("com.krystalmc.stats", "skript");
                 getLogger().info("¡Compatibilidad con Skript cargada exitosamente!");
             } catch (IOException e) {
