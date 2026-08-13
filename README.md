@@ -1,5 +1,6 @@
 # KrystalStats
-Plugin para servidores Minecraft Paper, que cambia el motor de daño del juego por uno propio
+Plugin para servidores Minecraft Paper, que cambia el motor de daño del juego por uno propio.
+
 La manera de calcular la reducción de daño es la siguiente:
 
 Primero, se calculan las estadisticas de defensa, armadura, dureza de armadura y encantamientos del jugador, bajo esta logica:
